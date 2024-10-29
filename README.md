@@ -4,8 +4,8 @@ This project is an implemetation and testing repository for the Expanding Revers
 
 ## Example usage
 
-'''python
+```python
 
 python main.py test 100 4 3 dbei
 
-'''
+```
