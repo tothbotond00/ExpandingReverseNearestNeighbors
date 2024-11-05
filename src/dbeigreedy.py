@@ -2,10 +2,9 @@ import networkx as nx
 import random
 import heapq
 import time
-import sys
 import ernn
 
-END_IN_ROUNDS = 20
+CONSECUTIVE_NO_GAIN_LIMIT = 20  # Number of consecutive rounds with no gain allowed before termination
 
 # Graph class with Greedy DBEI Algorithm (Algorithm 3)
 class DBEIGreedyAlgorithm(ernn.ERNN):
@@ -27,11 +26,13 @@ class DBEIGreedyAlgorithm(ernn.ERNN):
         # Copy graph for incremental updates
         graph_copy = self.graph.copy()
         
-        end_counter = 0
+        no_gain_counter = 0  # Tracks consecutive rounds with no RNN gain
 
         while upgraded_count < budget and edge_queue:
-            if end_counter > END_IN_ROUNDS:
-                break 
+            if no_gain_counter >= CONSECUTIVE_NO_GAIN_LIMIT:
+                print("Terminating early due to lack of RNN gain in consecutive rounds.")
+                break  # Terminate if no gain is achieved for a specified limit
+
             edge_distance, u, v, weight = heapq.heappop(edge_queue)
 
             print(f"Inspecting edge ({u}, {v}) with distance {edge_distance} and weight {weight}")
@@ -46,14 +47,15 @@ class DBEIGreedyAlgorithm(ernn.ERNN):
 
             # Check if this edge upgrade improves the RNN gain
             if len(new_rnn) > len(current_rnn):
-                print(f"Upgrading edge ({u}, {v}) increases RNN size from {len(new_rnn)} to {len(current_rnn)}")
+                print(f"Upgrading edge ({u}, {v}) increases RNN size from {len(current_rnn)} to {len(new_rnn)}")
                 current_rnn = new_rnn
                 upgraded_edges.append((u, v, weight))
                 upgraded_count += 1
+                no_gain_counter = 0  # Reset counter on successful gain
             else:
                 # Restore original weight if no gain
                 graph_copy[u][v]['weight'] = original_weight
                 print(f"Restoring edge ({u}, {v}) to original weight, no RNN gain")
-            end_counter += 1
+                no_gain_counter += 1  # Increment no-gain counter
 
         return upgraded_edges, len(current_rnn), len(start_rnn)
