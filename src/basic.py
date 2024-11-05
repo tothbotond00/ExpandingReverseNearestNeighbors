@@ -37,8 +37,6 @@ class BasicAlgorithm(ernn.ERNN):
             if upgraded_count >= budget or end_counter > END_IN_ROUNDS:
                 break  # Stop once the budget is exhausted
 
-            print(f"Considering edge ({u}, {v}) with distance {edge_distance} and original weight {weight}")
-
             # Simulate upgrading edge (set weight to 0) in the copied graph
             original_weight = graph_copy[u][v]['weight']
             graph_copy[u][v]['weight'] = 0
@@ -51,11 +49,11 @@ class BasicAlgorithm(ernn.ERNN):
                 upgraded_edges.append((u, v, weight))
                 current_rnn = new_rnn
                 upgraded_count += 1
-                print(f"Upgraded edge ({u}, {v}) increased RNN size to {len(current_rnn)}")
+                print(f"Upgraded best edge ({u}, {v}) increased RNN size to {len(current_rnn)}")
             else:
                 # Restore original weight if no gain
                 graph_copy[u][v]['weight'] = original_weight
-                print(f"Restoring edge ({u}, {v}) to original weight, no RNN gain")
+                #print(f"Restoring edge ({u}, {v}) to original weight, no RNN gain")
             end_counter += 1
 
         self.graph = graph_copy  # Update the main graph after upgrading edges
